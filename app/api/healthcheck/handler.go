@@ -18,7 +18,7 @@ func HealthCheck(ctx *fasthttp.RequestCtx) {
 	}
 	response, err := json.Marshal(&r)
 
-	// Todo:
+	// Todo: move this code to a separated function specialized on building the final response
 	ctx.Response.Header.Set("Content-Type", "application/json")
 	ctx.Response.SetStatusCode(fasthttp.StatusOK)
 	if err != nil {
