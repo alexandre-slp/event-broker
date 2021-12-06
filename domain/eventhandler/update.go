@@ -2,30 +2,21 @@ package eventhandler
 
 import (
 	"fmt"
+	"github.com/alexandre-slp/event-broker/app/api"
 	"github.com/alexandre-slp/event-broker/domain"
-	jsoniter "github.com/json-iterator/go"
+	"github.com/alexandre-slp/event-broker/infra"
 	"github.com/valyala/fasthttp"
 )
 
 // UpdateEvent : Update event
 func UpdateEvent(ctx *fasthttp.RequestCtx) {
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
-
-	b := domain.SavedEvent{}
-	err := json.Unmarshal(ctx.PostBody(), &b)
+	body := domain.SavedEvent{}
+	err := infra.Json.Unmarshal(ctx.PostBody(), &body)
 	if err != nil {
 		return
 	}
 
-	b.Topics = append(b.Topics, fmt.Sprint(ctx.UserValue("id")))
-	response, err := json.Marshal(&b)
+	body.Topics = append(body.Topics, fmt.Sprint(ctx.UserValue("id")))
 
-	ctx.Response.Header.Set("Content-Type", "application/json")
-	if err != nil {
-		return
-	}
-	_, err = ctx.Write(response)
-	if err != nil {
-		return
-	}
+	api.NewResponse(ctx, body, fasthttp.StatusOK).WriteResponse()
 }

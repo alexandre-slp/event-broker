@@ -6,7 +6,6 @@ import (
 	"github.com/alexandre-slp/event-broker/app/api/v1"
 	"github.com/fasthttp/router"
 	"github.com/valyala/fasthttp"
-	"log"
 )
 
 func main() {
@@ -18,6 +17,22 @@ func main() {
 		healthcheck.NewService(),
 		v1.NewService(),
 	)
+	
 
-	log.Fatal(fasthttp.ListenAndServe(":8080", rh))
+	s := fasthttp.Server{
+		Handler:                            rh,
+		Name:                               "Test server",
+		Concurrency:                        0,
+		ReadBufferSize:                     0,
+		WriteBufferSize:                    0,
+		ReadTimeout:                        0,
+		WriteTimeout:                       0,
+		IdleTimeout:                        0,
+		MaxConnsPerIP:                      0,
+		MaxRequestsPerConn:                 0,
+	}
+	err := s.ListenAndServe(":8080")
+	if err != nil {
+		return 
+	}
 }

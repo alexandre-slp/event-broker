@@ -2,27 +2,25 @@ package healthcheck_test
 
 import (
 	"github.com/alexandre-slp/event-broker/app/api/healthcheck"
-	"github.com/alexandre-slp/event-broker/mocks"
-	"github.com/golang/mock/gomock"
 	"reflect"
 	"testing"
 )
 
-func TestInitializeHealthCheckService_InitPaths(t *testing.T) {
-	t.Parallel()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	ihcs := healthcheck.NewService()
-	mrs := mocks.NewMockRouter(ctrl)
-
-	mrs.
-		EXPECT().
-		GET("/healthcheck", healthcheck.HealthCheck)
-
-
-	ihcs.InitPaths(mrs)
-}
+//func TestInitializeHealthCheckService_InitPaths(t *testing.T) {
+//	t.Parallel()
+//	ctrl := gomock.NewController(t)
+//	defer ctrl.Finish()
+//
+//	ihcs := healthcheck.NewService()
+//	mrs := mocks.NewMockRouter(ctrl)
+//
+//	mrs.
+//		EXPECT().
+//		GET("/healthcheck", healthcheck.HealthCheck)
+//
+//
+//	ihcs.InitPaths(mrs)
+//}
 
 func TestNewService(t *testing.T) {
 	t.Parallel()

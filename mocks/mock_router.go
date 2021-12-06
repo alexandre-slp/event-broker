@@ -36,7 +36,7 @@ func (m *MockRouter) EXPECT() *MockRouterMockRecorder {
 }
 
 // DELETE mocks base method.
-func (m *MockRouter) DELETE(arg0 string, arg1 func(*fasthttp.RequestCtx)) {
+func (m *MockRouter) DELETE(arg0 string, arg1 fasthttp.RequestHandler) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "DELETE", arg0, arg1)
 }
@@ -48,7 +48,7 @@ func (mr *MockRouterMockRecorder) DELETE(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // GET mocks base method.
-func (m *MockRouter) GET(arg0 string, arg1 func(*fasthttp.RequestCtx)) {
+func (m *MockRouter) GET(arg0 string, arg1 fasthttp.RequestHandler) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "GET", arg0, arg1)
 }
@@ -74,10 +74,10 @@ func (mr *MockRouterMockRecorder) Group(arg0 interface{}) *gomock.Call {
 }
 
 // Handler mocks base method.
-func (m *MockRouter) Handler() func(*fasthttp.RequestCtx) {
+func (m *MockRouter) Handler() fasthttp.RequestHandler {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Handler")
-	ret0, _ := ret[0].(func(*fasthttp.RequestCtx))
+	ret0, _ := ret[0].(fasthttp.RequestHandler)
 	return ret0
 }
 
@@ -88,7 +88,7 @@ func (mr *MockRouterMockRecorder) Handler() *gomock.Call {
 }
 
 // PATCH mocks base method.
-func (m *MockRouter) PATCH(arg0 string, arg1 func(*fasthttp.RequestCtx)) {
+func (m *MockRouter) PATCH(arg0 string, arg1 fasthttp.RequestHandler) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "PATCH", arg0, arg1)
 }
@@ -100,7 +100,7 @@ func (mr *MockRouterMockRecorder) PATCH(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // POST mocks base method.
-func (m *MockRouter) POST(arg0 string, arg1 func(*fasthttp.RequestCtx)) {
+func (m *MockRouter) POST(arg0 string, arg1 fasthttp.RequestHandler) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "POST", arg0, arg1)
 }
@@ -112,7 +112,7 @@ func (mr *MockRouterMockRecorder) POST(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // PUT mocks base method.
-func (m *MockRouter) PUT(arg0 string, arg1 func(*fasthttp.RequestCtx)) {
+func (m *MockRouter) PUT(arg0 string, arg1 fasthttp.RequestHandler) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "PUT", arg0, arg1)
 }

@@ -21,7 +21,7 @@ type RequestHandlerService struct {
 	rs *RouterService
 }
 
-func (rhs RequestHandlerService) InitRequestHandler(pi ...PathInitializer) func(ctx *fasthttp.RequestCtx) {
+func (rhs RequestHandlerService) InitRequestHandler(pi ...PathInitializer) fasthttp.RequestHandler {
 	for _, route := range pi {
 		route.InitPaths(rhs.rs)
 	}
@@ -32,27 +32,27 @@ type RouterService struct {
 	r *router.Router
 }
 
-func (rs RouterService) GET(path string, handler func(*fasthttp.RequestCtx)) {
+func (rs RouterService) GET(path string, handler fasthttp.RequestHandler) {
 	rs.r.GET(path, handler)
 }
 
-func (rs RouterService) POST(path string, handler func(*fasthttp.RequestCtx)) {
+func (rs RouterService) POST(path string, handler fasthttp.RequestHandler) {
 	rs.r.POST(path, handler)
 }
 
-func (rs RouterService) PUT(path string, handler func(*fasthttp.RequestCtx)) {
+func (rs RouterService) PUT(path string, handler fasthttp.RequestHandler) {
 	rs.r.PUT(path, handler)
 }
 
-func (rs RouterService) PATCH(path string, handler func(*fasthttp.RequestCtx)) {
+func (rs RouterService) PATCH(path string, handler fasthttp.RequestHandler) {
 	rs.r.PATCH(path, handler)
 }
 
-func (rs RouterService) DELETE(path string, handler func(*fasthttp.RequestCtx)) {
+func (rs RouterService) DELETE(path string, handler fasthttp.RequestHandler) {
 	rs.r.DELETE(path, handler)
 }
 
-func (rs RouterService) Handler() func(ctx *fasthttp.RequestCtx){
+func (rs RouterService) Handler() fasthttp.RequestHandler {
 	return rs.r.Handler
 }
 

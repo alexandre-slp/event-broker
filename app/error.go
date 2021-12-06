@@ -1,25 +1,30 @@
 package app
 
-import (
-	"github.com/valyala/fasthttp"
-)
+import "github.com/valyala/fasthttp"
 
-type ExampleError struct {
-	msg  string
-	code int
+type customError struct {
+	Msg  string `json:"Error"`
+	Code int `json:"-"`
 }
 
-func (c *ExampleError) Msg() string {
-	return c.msg
+func (c customError) ReturnedMsg() string {
+	return c.Msg
 }
 
-func (c *ExampleError) Code() int {
-	return c.code
+func (c customError) ReturnedCode() int {
+	return c.Code
 }
 
-func NewExampleError() *ExampleError {
-	return &ExampleError{
-		msg:  "error msg",
-		code: fasthttp.StatusInternalServerError,
+func NewExampleError() *customError {
+	return &customError{
+		Msg:  "example error msg",
+		Code: fasthttp.StatusInternalServerError,
+	}
+}
+
+func NewExampleError2() *customError {
+	return &customError{
+		Msg:  "example error msg2",
+		Code: fasthttp.StatusInternalServerError,
 	}
 }

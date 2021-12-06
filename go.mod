@@ -5,7 +5,9 @@ go 1.17
 require (
 	github.com/fasthttp/router v1.4.4
 	github.com/golang/mock v1.6.0
+	github.com/google/uuid v1.3.0
 	github.com/json-iterator/go v1.1.12
+	github.com/rs/zerolog v1.26.0
 	github.com/valyala/fasthttp v1.31.0
 )
 

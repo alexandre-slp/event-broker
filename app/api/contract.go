@@ -7,7 +7,12 @@ import (
 
 //go:generate mockgen --build_flags=--mod=mod -destination=../../mocks/mock_requesthandler.go -package=mocks . RequestHandler
 type RequestHandler interface {
-	InitRequestHandler(...PathInitializer) func(*fasthttp.RequestCtx)
+	InitRequestHandler(...PathInitializer) fasthttp.RequestHandler
+}
+
+//go:generate mockgen --build_flags=--mod=mod -destination=../../mocks/mock_responsebuilder.go -package=mocks . ResponseBuilder
+type ResponseBuilder interface {
+	WriteResponse()
 }
 
 //go:generate mockgen --build_flags=--mod=mod -destination=../../mocks/mock_pathinitializer.go -package=mocks . PathInitializer
@@ -17,17 +22,17 @@ type PathInitializer interface {
 
 //go:generate mockgen --build_flags=--mod=mod -destination=../../mocks/mock_router.go -package=mocks . Router
 type Router interface {
-	GET(string, func(*fasthttp.RequestCtx))
-	POST(string, func(*fasthttp.RequestCtx))
-	PUT(string, func(*fasthttp.RequestCtx))
-	PATCH(string, func(*fasthttp.RequestCtx))
-	DELETE(string, func(*fasthttp.RequestCtx))
-	Handler() func(*fasthttp.RequestCtx)
+	GET(string, fasthttp.RequestHandler)
+	POST(string, fasthttp.RequestHandler)
+	PUT(string, fasthttp.RequestHandler)
+	PATCH(string, fasthttp.RequestHandler)
+	DELETE(string, fasthttp.RequestHandler)
+	Handler() fasthttp.RequestHandler
 	Group(string) *router.Group
 }
 
 //go:generate mockgen --build_flags=--mod=mod -destination=../../mocks/mock_customerror.go -package=mocks . CustomError
 type CustomError interface {
-	Msg() string
-	Code() int
+	ReturnedMsg() string
+	ReturnedCode() int
 }

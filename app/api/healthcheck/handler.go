@@ -1,31 +1,28 @@
 package healthcheck
 
 import (
-	jsoniter "github.com/json-iterator/go"
+	"github.com/alexandre-slp/event-broker/app/api"
+	"github.com/rs/zerolog"
 	"github.com/valyala/fasthttp"
+	"time"
 )
-
-// Todo: user interface as argument
 
 // HealthCheck : Check api health
 func HealthCheck(ctx *fasthttp.RequestCtx) {
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
+	logger := ctx.UserValue("logger").(zerolog.Logger)
 
-	r := struct {
+	body := struct {
 		Name string `json:"route_name"`
 	}{
 		Name: "health check",
 	}
-	response, err := json.Marshal(&r)
 
-	// Todo: move this code to a separated function specialized on building the final response
-	ctx.Response.Header.Set("Content-Type", "application/json")
-	ctx.Response.SetStatusCode(fasthttp.StatusOK)
-	if err != nil {
-		return
-	}
-	_, err = ctx.Write(response)
-	if err != nil {
-		return
-	}
+	time.Sleep(3 * time.Millisecond)
+	api.NewResponse(ctx, body, fasthttp.StatusOK).WriteResponse()
+	logger.Debug().Msg("test")
+		//Fields(map[string]string{
+		//	"method":       fmt.Sprintf("%v", ctx.Method()),
+		//	"elapsed_time": fmt.Sprintf("%vms", time.Now().Sub(ctx.UserValue("startRequest").(time.Time)).Milliseconds()),
+		//}).
+		//Interface("msg", ctx)
 }

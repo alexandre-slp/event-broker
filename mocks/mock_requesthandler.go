@@ -36,14 +36,14 @@ func (m *MockRequestHandler) EXPECT() *MockRequestHandlerMockRecorder {
 }
 
 // InitRequestHandler mocks base method.
-func (m *MockRequestHandler) InitRequestHandler(arg0 ...api.PathInitializer) func(*fasthttp.RequestCtx) {
+func (m *MockRequestHandler) InitRequestHandler(arg0 ...api.PathInitializer) fasthttp.RequestHandler {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{}
 	for _, a := range arg0 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "InitRequestHandler", varargs...)
-	ret0, _ := ret[0].(func(*fasthttp.RequestCtx))
+	ret0, _ := ret[0].(fasthttp.RequestHandler)
 	return ret0
 }
 
