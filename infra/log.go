@@ -24,9 +24,11 @@ func SetupRequestLogger() zerolog.Logger {
 		Out:        os.Stdout,
 		TimeFormat: timeFormat,
 	}
+
 	output.FormatFieldName = func(i interface{}) string {
 		return ""
 	}
+
 	output.PartsExclude = []string{
 		zerolog.LevelFieldName,
 		zerolog.MessageFieldName,
@@ -43,6 +45,7 @@ func SetupAppLogger() zerolog.Logger {
 		Out:        os.Stdout,
 		TimeFormat: timeFormat,
 	}
+
 	output.FormatLevel = func(i interface{}) string {
 	   return strings.ToUpper(fmt.Sprintf("| %-6s|", i))
 	}
