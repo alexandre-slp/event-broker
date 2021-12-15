@@ -12,7 +12,7 @@ import (
 
 var (
 	RequestLogger = SetupRequestLogger()
-	AppLogger = SetupAppLogger()
+	AppLogger     = SetupAppLogger()
 )
 
 const (
@@ -24,8 +24,10 @@ func SetupRequestLogger() zerolog.Logger {
 		Out:        os.Stdout,
 		TimeFormat: timeFormat,
 	}
-
 	output.FormatFieldName = func(i interface{}) string {
+		if i == "method" {
+			return "\b"
+		}
 		return ""
 	}
 
@@ -47,7 +49,7 @@ func SetupAppLogger() zerolog.Logger {
 	}
 
 	output.FormatLevel = func(i interface{}) string {
-	   return strings.ToUpper(fmt.Sprintf("| %-6s|", i))
+		return strings.ToUpper(fmt.Sprintf("| %-6s|", i))
 	}
 
 	output.FormatMessage = func(i interface{}) string {

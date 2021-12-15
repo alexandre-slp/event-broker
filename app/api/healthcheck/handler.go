@@ -18,11 +18,6 @@ func HealthCheck(ctx *fasthttp.RequestCtx) {
 	}
 
 	time.Sleep(3 * time.Millisecond)
-	api.NewResponse(ctx, body, fasthttp.StatusOK).WriteResponse()
 	logger.Debug().Msg("test")
-		//Fields(map[string]string{
-		//	"method":       fmt.Sprintf("%v", ctx.Method()),
-		//	"elapsed_time": fmt.Sprintf("%vms", time.Now().Sub(ctx.UserValue("startRequest").(time.Time)).Milliseconds()),
-		//}).
-		//Interface("msg", ctx)
+	api.NewResponse(ctx, body, fasthttp.StatusOK).WriteResponse()
 }

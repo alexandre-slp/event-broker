@@ -54,7 +54,7 @@ func (m *MockRouter) GET(arg0 string, arg1 fasthttp.RequestHandler) {
 }
 
 // GET indicates an expected call of GET.
-func (mr *MockRouterMockRecorder) GET(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockRouterMockRecorder) GET(arg0 string, arg1 fasthttp.RequestHandler) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GET", reflect.TypeOf((*MockRouter)(nil).GET), arg0, arg1)
 }
