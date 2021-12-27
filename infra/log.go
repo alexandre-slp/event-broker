@@ -1,33 +1,81 @@
 package infra
 
 import (
+	"context"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
-	"github.com/valyala/fasthttp"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/peer"
+	"google.golang.org/grpc/status"
 	"os"
+	"path"
 	"strings"
 	"time"
-)
-
-var (
-	RequestLogger = SetupRequestLogger()
-	AppLogger     = SetupAppLogger()
 )
 
 const (
 	timeFormat = "2006-01-02T15:04:05-0700"
 )
 
-func SetupRequestLogger() zerolog.Logger {
+//UnaryZerologOption todo
+func UnaryZerologOption() grpc.ServerOption {
+	return grpc.UnaryInterceptor(UnaryZerologInterceptor())
+}
+
+func UnaryZerologInterceptor() grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
+		// Before processing
+		var requestIdSlice []string
+		requestId := uuid.New().String()
+		if md, ok := metadata.FromIncomingContext(ctx); ok {
+			requestIdSlice = md.Get("x-request-id")
+		}
+
+		if len(requestIdSlice) > 0 {
+			requestId = requestIdSlice[0]
+		}
+
+		contextAppLogger := setupAppLogger().
+			With().
+			Str("requestId", requestId).
+			Logger()
+
+		ctxWithLogger := context.WithValue(ctx, "logger", contextAppLogger)
+		startRequestTime := time.Now()
+
+		// Process
+		resp, err := handler(ctxWithLogger, req)
+
+		// After process
+		endRequestTime := time.Now()
+		p, ok := peer.FromContext(ctx)
+		if !ok {
+			// todo error handling
+		}
+		requestDuration := fmt.Sprintf("%vms", endRequestTime.Sub(startRequestTime).Milliseconds())
+		contextRequestLogger := setupRequestLogger().
+			With().
+			Str("requestId", requestId).
+			Str("method", path.Base(info.FullMethod)).
+			Str("requestDuration", requestDuration).
+			Str("statusCode", status.Code(err).String()).
+			Str("ip", p.Addr.String()).
+			Logger()
+
+		contextRequestLogger.Info().Msg("")
+
+		return resp, err
+	}
+}
+
+func setupRequestLogger() zerolog.Logger {
 	output := zerolog.ConsoleWriter{
 		Out:        os.Stdout,
 		TimeFormat: timeFormat,
 	}
 	output.FormatFieldName = func(i interface{}) string {
-		if i == "method" {
-			return "\b"
-		}
 		return ""
 	}
 
@@ -42,7 +90,7 @@ func SetupRequestLogger() zerolog.Logger {
 		Logger()
 }
 
-func SetupAppLogger() zerolog.Logger {
+func setupAppLogger() zerolog.Logger {
 	output := zerolog.ConsoleWriter{
 		Out:        os.Stdout,
 		TimeFormat: timeFormat,
@@ -60,37 +108,4 @@ func SetupAppLogger() zerolog.Logger {
 		With().
 		Timestamp().
 		Logger()
-}
-
-func LoggerMiddleware(next fasthttp.RequestHandler) fasthttp.RequestHandler {
-	return func(ctx *fasthttp.RequestCtx) {
-		requestId := string(ctx.Request.Header.Peek("x-request-id"))
-
-		if requestId == "" {
-			requestId = uuid.New().String()
-		}
-
-		contextAppLogger := AppLogger.
-			With().
-			Str("requestId", requestId).
-			Logger()
-
-		startRequestTime := time.Now()
-		ctx.SetUserValue("logger", contextAppLogger)
-		// Before request
-		next(ctx)
-		// After request
-		endRequestTime := time.Now()
-		requestDuration := fmt.Sprintf("%vms", endRequestTime.Sub(startRequestTime).Milliseconds())
-		contextRequestLogger := RequestLogger.
-			With().
-			Str("requestId", requestId).
-			Str("path", string(ctx.Path())).
-			Str("method", string(ctx.Method())).
-			Str("requestDuration", requestDuration).
-			Str("statusCode", fmt.Sprintf("%v", ctx.Response.StatusCode())).
-			Logger()
-
-		contextRequestLogger.Info().Msg("")
-	}
 }

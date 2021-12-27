@@ -1,4 +1,6 @@
-// What to put here?
-// All configs used in the infra layer
-
 package app
+
+const (
+	//Port Server port
+	Port = ":9000"
+)

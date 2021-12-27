@@ -3,11 +3,11 @@
 package domain
 
 type SentEvent struct {
-	Name    string      `json:"name,omitempty"`
-	Message interface{} `json:"message,omitempty"`
+	Name    string
+	Message interface{}
 }
 
 type SavedEvent struct {
-	Name   string   `json:"name,omitempty"`
-	Topics []string `json:"topics,omitempty"`
+	Name   string
+	Topics []string
 }

@@ -1,1 +1,0 @@
-The app layer should contain All the bureaucratic logic to wrap the infra and domain logic to be executed by cmd

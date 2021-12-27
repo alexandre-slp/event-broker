@@ -1,1 +1,0 @@
-The domain layer should contain all the elements that represents the business logic.

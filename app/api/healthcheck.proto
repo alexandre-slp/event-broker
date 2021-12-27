@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option go_package = "event-broker/app/api/healthcheck";
+
+package healthcheck;
+
+// protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative app/api/healthcheck/healthcheck.proto
+service Healthcheck {
+    rpc GetHealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {}
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  string status = 1;
+}
