@@ -13,8 +13,8 @@ type HealthCheckServer struct {
 
 // GetHealthCheck implements healthcheck
 func (s *HealthCheckServer) GetHealthCheck(ctx context.Context, in *serializer.HealthCheckRequest) (*serializer.HealthCheckResponse, error) {
-	//panic(eris.New("xpto"))
-	//panic(app.NewExampleError(eris.New("xpto")))
+	//panic("xpto")
+	//panic(app.NewExampleError())
 
 	return &serializer.HealthCheckResponse{Status: "ok"}, nil
 }

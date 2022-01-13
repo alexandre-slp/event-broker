@@ -2,17 +2,15 @@ package app
 
 import (
 	"context"
-	"encoding/json"
-	"github.com/rotisserie/eris"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"runtime/debug"
 )
 
 type customError struct {
 	msg        string
 	statusCode codes.Code
-	erisError  error
 }
 
 func (ce customError) Error() string {
@@ -26,20 +24,22 @@ func (ce customError) returnedCode() codes.Code {
 // CustomPanicHandler Define how to handle panic
 func CustomPanicHandler(ctx context.Context, p interface{}) (err error) {
 	logger := ctx.Value("logger").(zerolog.Logger)
-	jsonFormatted, err := json.MarshalIndent(eris.ToJSON(p.(error), true), "", "  ")
-	if err != nil {
-		return err
+	ce, ok := p.(*customError)
+	if ok {
+		logger.Error().Msg(ce.msg)
+		return status.Errorf(codes.Internal, "error: %v", ce.msg)
 	}
-	logger.Error().Msg(string(jsonFormatted))
-	return status.Errorf(codes.Internal, "panic triggered: %v", p)
+
+	logger.Error().Msg(string(debug.Stack()))
+	return status.Errorf(codes.Internal, "unhadled error: %v", p)
+
 }
 
 //NewExampleError Example error
-func NewExampleError(err error) *customError {
+func NewExampleError() *customError {
 	errorMsg := "example error msg"
 	return &customError{
 		msg:        errorMsg,
 		statusCode: codes.Internal,
-		erisError:  err,
 	}
 }
