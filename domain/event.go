@@ -13,5 +13,6 @@ type EventServer struct {
 
 // ListEvents implements list events
 func (s *EventServer) ListEvents(ctx context.Context, in *serializer.ListEventRequest) (*serializer.ListEventResponse, error) {
+	// TODO: add logic
 	return &serializer.ListEventResponse{Events: "events"}, nil
 }

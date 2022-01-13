@@ -3,7 +3,8 @@
 
 package infra
 
-type database interface {
+//Database All database interactors must follow this contract
+type Database interface {
 	addEvent()
 	updateEvent()
 	removeEvent()
