@@ -19,11 +19,12 @@ const (
 	timeFormat = "2006-01-02T15:04:05-0700"
 )
 
-//UnaryZerologOption todo
-func UnaryZerologOption() grpc.ServerOption {
-	return grpc.UnaryInterceptor(UnaryZerologInterceptor())
-}
+////UnaryZerologOption todo
+//func UnaryZerologOption() grpc.ServerOption {
+//	return grpc.UnaryInterceptor(UnaryZerologInterceptor())
+//}
 
+//UnaryZerologInterceptor todo
 func UnaryZerologInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
 		// Before processing
