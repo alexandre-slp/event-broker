@@ -1,0 +1,7 @@
+.dockerignore
+.gitignore
+.idea
+Dockerfile
+LICENSE.txt
+README.md
+vendor

@@ -13,7 +13,12 @@ import (
 )
 
 func main() {
-	lis, err := net.Listen("tcp", app.Port)
+	cfg, err := app.NewConfig()
+	if err != nil {
+		log.Fatalf("error while loading cfg. err: %v", err)
+	}
+
+	lis, err := net.Listen("tcp", ":"+cfg.GRPC.Port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
