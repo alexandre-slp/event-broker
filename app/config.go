@@ -1,4 +1,4 @@
-package app
+package main
 
 import (
 	"encoding"
@@ -9,8 +9,16 @@ import (
 	"github.com/spf13/viper"
 )
 
-type config struct {
+//Config The configuration struc has all the configurations needed by the app
+type Config struct {
+	APP  app  `mapstructure:",squash"`
 	GRPC grpc `mapstructure:",squash"`
+}
+
+type app struct {
+	LogLevel string `mapstructure:"log_level"`
+	Name     string `mapstructure:"app_name"`
+	Debug    bool   `mapstructure:"debug"`
 }
 
 type grpc struct {
@@ -18,13 +26,13 @@ type grpc struct {
 }
 
 //NewConfig Creates a new config struct with current env var values
-func NewConfig() (*config, error) {
+func NewConfig() (*Config, error) {
 	viper.SetDefault("GRPC_PORT", "80")
 
-	//viper.SetDefault("DEBUG", "true")
-	//viper.SetDefault("LOG_LEVEL", "debug")
+	viper.SetDefault("DEBUG", "true")
+	viper.SetDefault("LOG_LEVEL", "debug")
 
-	//viper.SetDefault("APP_NAME", "event_broker")
+	viper.SetDefault("APP_NAME", "event_broker")
 
 	viper.SetConfigType("env")
 	viper.SetConfigFile(".env")
@@ -34,7 +42,7 @@ func NewConfig() (*config, error) {
 		log.Println("config: .env file not found")
 	}
 
-	cfg := &config{}
+	cfg := &Config{}
 	if err := viper.Unmarshal(cfg, viper.DecodeHook(
 		mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),

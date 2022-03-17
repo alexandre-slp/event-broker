@@ -1,6 +1,6 @@
 package infra
 
-func NewMongoService(connString string) *mongoService {
+func NewMongoService(connString string) Repo {
 	return &mongoService{
 		connectionString: connString,
 	}

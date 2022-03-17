@@ -3,8 +3,8 @@
 
 package infra
 
-//Database All database interactors must follow this contract
-type Database interface {
+//Repo All database interactors must follow this contract
+type Repo interface {
 	addEvent()
 	updateEvent()
 	removeEvent()

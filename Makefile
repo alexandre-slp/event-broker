@@ -4,7 +4,7 @@
 PWD=$(shell pwd)
 APP_NAME?=$(shell pwd | xargs basename)
 APP_DIR=${PWD}
-INTERACTIVE:=$(shell [ -t 0 ] && echo i || echo d)
+INTERACTIVE_OR_DETACH:=$(shell [ -t 0 ] && echo --interactive || echo --detach)
 PROJECT_FILES=$(shell find . -type f -name '*.go' -not -path "./vendor/*")
 GRPC_PORT:=6666
 DEBUG_PORT:=2345
@@ -16,7 +16,6 @@ welcome:
 	@printf "\033[33m / /___ | |/ /  __/ / / / /_   / /_/ / /  / /_/ / ,< /  __/ /		\n"
 	@printf "\033[33m/_____/ |___/\___/_/ /_/\__/  /_____/_/   \____/_/|_|\___/_/		\n"
 	@printf "\n"
-
 
 .env:
 	@cp .env.default .env
@@ -30,10 +29,11 @@ test: welcome vendor dev
 	@go clean --testcache
 
 	@docker run \
-		-t${INTERACTIVE} \
+		${INTERACTIVE_OR_DETACH} \
+		--tty \
 		--rm \
-		-v ${PWD}:${APP_DIR}:delegated \
-		-w ${APP_DIR} \
+		--volume ${PWD}:${APP_DIR} \
+		--workdir ${APP_DIR} \
 		--name ${APP_NAME}-test \
 		${APP_NAME} \
 		go clean --testcache && \
@@ -42,33 +42,35 @@ test: welcome vendor dev
 dev: welcome .env
 	@docker build \
 		--target development \
-		-t ${APP_NAME} \
+		--tag ${APP_NAME} \
 		.
 
 server: welcome .env dev ## Runs http server in development mode
 	@echo 'Running on http://localhost:$(GRPC_PORT)'
 
 	@docker run \
-		-t${INTERACTIVE} \
+		${INTERACTIVE_OR_DETACH} \
+		--tty \
 		--rm \
-		-v ${PWD}:${APP_DIR}:delegated \
-		-w ${APP_DIR} \
+		--volume ${PWD}:${APP_DIR} \
+		--workdir ${APP_DIR} \
 		--expose 80 \
-		-p $(GRPC_PORT):80 \
+		--publish $(GRPC_PORT):80 \
 		--name ${APP_NAME} \
 		${APP_NAME}
 
 server-debug: welcome .env dev ## Runs http server in debug mode
-	@echo 'Running on http://localhost:$(GRPC_PORT)'
+	@echo 'Running on http://localhost:$(DEBUG_PORT)'
 
-	@docker run
-		-t${INTERACTIVE} \
+	@docker run \
+		${INTERACTIVE_OR_DETACH} \
+		--tty \
 		--rm \
-		-v ${PWD}:${APP_DIR}:delegated \
-		-w ${APP_DIR} \
+		--volume ${PWD}:${APP_DIR} \
+		--workdir ${APP_DIR} \
 		--expose $(DEBUG_PORT) \
 		--expose 80 \
-		-p $(GRPC_PORT):80 \
+		--publish $(DEBUG_PORT):80 \
 		--name ${APP_NAME} \
 		${APP_NAME} \
 		modd -f ./cmd/server/debug_modd.conf
@@ -85,11 +87,12 @@ vet: ## Reports suspicious constructs
 	@go vet ./...
 
 lint: welcome .env dev ## Code verifier
-	@docker run
-		-t${INTERACTIVE} \
+	@docker run \
+		${INTERACTIVE_OR_DETACH} \
+		--tty \
 		--rm \
-		-v ${PWD}:${APP_DIR}:delegated \
-		-w ${APP_DIR} \
+		--volume ${PWD}:${APP_DIR} \
+		--workdir ${APP_DIR} \
 		--name ${APP_NAME}-lint \
 		${APP_NAME} \
 		golangci-lint run --print-resources-usage --timeout=180s --out-format=tab ./...

@@ -4,7 +4,7 @@ package gRPC
 
 import (
 	context "context"
-	"github.com/alexandre-slp/event-broker/app/api/v1/serializer"
+	"github.com/alexandre-slp/event-broker/cmd/server/api/v1/serializer"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
