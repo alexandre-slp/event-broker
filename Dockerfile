@@ -3,8 +3,6 @@ FROM golang:1.17-alpine AS base
 RUN apk add curl build-base
 
 WORKDIR /event-broker
-COPY ./ ./
-RUN go mod vendor
 
 
 FROM base as development
@@ -13,12 +11,15 @@ RUN go install github.com/cortesi/modd/cmd/modd@latest
 RUN go install github.com/go-delve/delve/cmd/dlv@v1.8.2
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.43.0
 
-CMD [ "go", "run", "-race", "./cmd/server/main2.go" ]
+CMD [ "go", "run", "-race", "./cmd/server/main.go" ]
 
 
 FROM base AS compiler_server
 ARG SERVER_BIN_PATH
 ARG SERVER_CMD_PATH
+
+COPY ./ ./
+RUN go mod vendor
 RUN go build -o /bin/server ./cmd/server
 
 

@@ -18,13 +18,41 @@ welcome:
 	@printf "\033[33m/_____/ |___/\___/_/ /_/\__/  /_____/_/   \____/_/|_|\___/_/		\n"
 	@printf "\n"
 
-.env:
-	@cp .env.default .env
+server-debug: welcome .env vendor ## Runs gRPC server in debug mode
+	@echo 'Running on http://localhost:${GRPC_PORT}'
 
-vendor:
-	@go mod vendor
+	@docker run \
+		${INTERACTIVE_OR_DETACH} \
+		--tty \
+		--rm \
+		--volume ${PWD}:${APP_DIR} \
+		--expose ${GRPC_PORT} \
+		--expose ${DEBUG_PORT} \
+		--publish ${GRPC_PORT}:${HTTP_PORT} \
+		--publish ${DEBUG_PORT}:${DEBUG_PORT} \
+		--env DEBUG_PORT=${DEBUG_PORT} \
+		--name ${APP_NAME} \
+		${APP_NAME} \
+		modd -f ./cmd/server/debug_modd.conf
 
-setup: welcome .env vendor ## Install dependencies
+server-release: welcome .env release ## Runs http server in release mode
+	@echo 'Running on http://localhost:${GRPC_PORT}'
+
+	@docker run \
+		${INTERACTIVE_OR_DETACH} \
+		--tty \
+		--rm \
+		--volume ${PWD}:${APP_DIR} \
+		--expose ${HTTP_PORT} \
+		--publish ${GRPC_PORT}:${HTTP_PORT} \
+		--name ${APP_NAME} \
+		${APP_NAME}
+
+release: welcome .env
+	@docker build \
+		--target release \
+		--tag ${APP_NAME} \
+		.
 
 test: welcome vendor
 	@go clean --testcache
@@ -39,42 +67,23 @@ test: welcome vendor
 		go clean --testcache && \
 		go test ./... -race
 
-dev: welcome .env
-	@docker build \
-		--target development \
-		--tag ${APP_NAME} \
-		.
-
-server-debug: welcome .env ## Runs http server in debug mode
-	@echo 'Running on http://localhost:${GRPC_PORT}'
-
+lint: welcome .env ## Code verifier
 	@docker run \
 		${INTERACTIVE_OR_DETACH} \
 		--tty \
 		--rm \
 		--volume ${PWD}:${APP_DIR} \
-		--expose ${GRPC_PORT} \
-		--expose ${DEBUG_PORT} \
-		--expose ${HTTP_PORT} \
-		--publish ${GRPC_PORT}:${HTTP_PORT} \
-		--publish ${DEBUG_PORT}:${DEBUG_PORT} \
-		--env DEBUG_PORT=${DEBUG_PORT} \
-		--name ${APP_NAME} \
+		--name ${APP_NAME}-lint \
 		${APP_NAME} \
-		modd -f ./cmd/server/debug_modd.conf
+		golangci-lint run --print-resources-usage --timeout=180s --out-format=tab ./...
 
-server: welcome .env ## Runs http server in development mode
-	@echo 'Running on http://localhost:${GRPC_PORT}'
+.env:
+	@cp .env.default .env
 
-	@docker run \
-		${INTERACTIVE_OR_DETACH} \
-		--tty \
-		--rm \
-		--volume ${PWD}:${APP_DIR} \
-		--expose ${HTTP_PORT} \
-		--publish ${GRPC_PORT}:${HTTP_PORT} \
-		--name ${APP_NAME} \
-		${APP_NAME}
+vendor:
+	@go mod vendor
+
+setup: welcome .env vendor ## Install dependencies
 
 clean: ## Cleans vendor and temp files
 	@-rm -rf vendor* _vendor* coverage.xml
@@ -86,16 +95,6 @@ format: ## Runs automatic and built-in code formatter
 
 vet: ## Reports suspicious constructs
 	@go vet ./...
-
-lint: welcome .env ## Code verifier
-	@docker run \
-		${INTERACTIVE_OR_DETACH} \
-		--tty \
-		--rm \
-		--volume ${PWD}:${APP_DIR} \
-		--name ${APP_NAME}-lint \
-		${APP_NAME} \
-		golangci-lint run --print-resources-usage --timeout=180s --out-format=tab ./...
 
 help: welcome
 	@grep -E '^[0-9a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep ^help -v | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-22s\033[0m %s\n", $$1, $$2}'
