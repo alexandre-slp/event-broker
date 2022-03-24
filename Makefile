@@ -3,9 +3,10 @@
 
 PWD=$(shell pwd)
 APP_NAME?=$(shell pwd | xargs basename)
-APP_DIR=${PWD}
+APP_DIR=$(shell echo /${APP_NAME})
 INTERACTIVE_OR_DETACH:=$(shell [ -t 0 ] && echo --interactive || echo --detach)
 PROJECT_FILES=$(shell find . -type f -name '*.go' -not -path "./vendor/*")
+HTTP_PORT:=80
 GRPC_PORT:=6666
 DEBUG_PORT:=2345
 
@@ -25,7 +26,7 @@ vendor:
 
 setup: welcome .env vendor ## Install dependencies
 
-test: welcome vendor dev
+test: welcome vendor
 	@go clean --testcache
 
 	@docker run \
@@ -33,7 +34,6 @@ test: welcome vendor dev
 		--tty \
 		--rm \
 		--volume ${PWD}:${APP_DIR} \
-		--workdir ${APP_DIR} \
 		--name ${APP_NAME}-test \
 		${APP_NAME} \
 		go clean --testcache && \
@@ -45,35 +45,36 @@ dev: welcome .env
 		--tag ${APP_NAME} \
 		.
 
-server: welcome .env dev ## Runs http server in development mode
-	@echo 'Running on http://localhost:$(GRPC_PORT)'
+server-debug: welcome .env ## Runs http server in debug mode
+	@echo 'Running on http://localhost:${GRPC_PORT}'
 
 	@docker run \
 		${INTERACTIVE_OR_DETACH} \
 		--tty \
 		--rm \
 		--volume ${PWD}:${APP_DIR} \
-		--workdir ${APP_DIR} \
-		--expose 80 \
-		--publish $(GRPC_PORT):80 \
-		--name ${APP_NAME} \
-		${APP_NAME}
-
-server-debug: welcome .env dev ## Runs http server in debug mode
-	@echo 'Running on http://localhost:$(DEBUG_PORT)'
-
-	@docker run \
-		${INTERACTIVE_OR_DETACH} \
-		--tty \
-		--rm \
-		--volume ${PWD}:${APP_DIR} \
-		--workdir ${APP_DIR} \
-		--expose $(DEBUG_PORT) \
-		--expose 80 \
-		--publish $(DEBUG_PORT):80 \
+		--expose ${GRPC_PORT} \
+		--expose ${DEBUG_PORT} \
+		--expose ${HTTP_PORT} \
+		--publish ${GRPC_PORT}:${HTTP_PORT} \
+		--publish ${DEBUG_PORT}:${DEBUG_PORT} \
+		--env DEBUG_PORT=${DEBUG_PORT} \
 		--name ${APP_NAME} \
 		${APP_NAME} \
 		modd -f ./cmd/server/debug_modd.conf
+
+server: welcome .env ## Runs http server in development mode
+	@echo 'Running on http://localhost:${GRPC_PORT}'
+
+	@docker run \
+		${INTERACTIVE_OR_DETACH} \
+		--tty \
+		--rm \
+		--volume ${PWD}:${APP_DIR} \
+		--expose ${HTTP_PORT} \
+		--publish ${GRPC_PORT}:${HTTP_PORT} \
+		--name ${APP_NAME} \
+		${APP_NAME}
 
 clean: ## Cleans vendor and temp files
 	@-rm -rf vendor* _vendor* coverage.xml
@@ -86,13 +87,12 @@ format: ## Runs automatic and built-in code formatter
 vet: ## Reports suspicious constructs
 	@go vet ./...
 
-lint: welcome .env dev ## Code verifier
+lint: welcome .env ## Code verifier
 	@docker run \
 		${INTERACTIVE_OR_DETACH} \
 		--tty \
 		--rm \
 		--volume ${PWD}:${APP_DIR} \
-		--workdir ${APP_DIR} \
 		--name ${APP_NAME}-lint \
 		${APP_NAME} \
 		golangci-lint run --print-resources-usage --timeout=180s --out-format=tab ./...

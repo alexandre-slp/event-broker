@@ -1,19 +1,19 @@
 FROM golang:1.17-alpine AS base
-
-WORKDIR /event-broker
-
 # Installing necessary components
 RUN apk add curl build-base
-COPY . ./
+
+WORKDIR /event-broker
+COPY ./ ./
 RUN go mod vendor
 
 
 FROM base as development
-RUN go install github.com/cortesi/modd/cmd/modd@latest # verificar
-RUN go install github.com/go-delve/delve/cmd/dlv@v1.8.0
+
+RUN go install github.com/cortesi/modd/cmd/modd@latest
+RUN go install github.com/go-delve/delve/cmd/dlv@v1.8.2
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.43.0
 
-CMD [ "go", "run", "-race", "./cmd/server/main.go" ]
+CMD [ "go", "run", "-race", "./cmd/server/main2.go" ]
 
 
 FROM base AS compiler_server
@@ -29,7 +29,6 @@ ARG RELEASE_BIN_PATH
 ENV RELEASE_BIN_ARGS ${RELEASE_BIN_ARGS}
 ENV RELEASE_BIN_PATH ${RELEASE_BIN_PATH}
 ENV TINI_VERSION v0.19.0
-
 
 RUN apk add --update --no-cache ca-certificates tzdata \
     && ln -fs /usr/share/zoneinfo/UTC /etc/localtime \
