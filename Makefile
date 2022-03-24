@@ -18,7 +18,7 @@ welcome:
 	@printf "\033[33m/_____/ |___/\___/_/ /_/\__/  /_____/_/   \____/_/|_|\___/_/		\n"
 	@printf "\n"
 
-server-debug: welcome .env vendor ## Runs gRPC server in debug mode
+debug: welcome .env vendor ## Run gRPC server in debug mode
 	@echo 'Running on http://localhost:${GRPC_PORT}'
 
 	@docker run \
@@ -31,11 +31,11 @@ server-debug: welcome .env vendor ## Runs gRPC server in debug mode
 		--publish ${GRPC_PORT}:${HTTP_PORT} \
 		--publish ${DEBUG_PORT}:${DEBUG_PORT} \
 		--env DEBUG_PORT=${DEBUG_PORT} \
-		--name ${APP_NAME} \
+		--name ${APP_NAME}-debug \
 		${APP_NAME} \
 		modd -f ./cmd/server/debug_modd.conf
 
-server-release: welcome .env release ## Runs http server in release mode
+dev: welcome .env vendor ## Run gRPC server
 	@echo 'Running on http://localhost:${GRPC_PORT}'
 
 	@docker run \
@@ -43,18 +43,13 @@ server-release: welcome .env release ## Runs http server in release mode
 		--tty \
 		--rm \
 		--volume ${PWD}:${APP_DIR} \
-		--expose ${HTTP_PORT} \
+		--expose ${GRPC_PORT} \
 		--publish ${GRPC_PORT}:${HTTP_PORT} \
-		--name ${APP_NAME} \
-		${APP_NAME}
+		--name ${APP_NAME}-dev \
+		${APP_NAME} \
+		modd -f ./cmd/server/dev_modd.conf
 
-release: welcome .env
-	@docker build \
-		--target release \
-		--tag ${APP_NAME} \
-		.
-
-test: welcome vendor
+test: welcome vendor ## Run tests
 	@go clean --testcache
 
 	@docker run \
@@ -67,7 +62,7 @@ test: welcome vendor
 		go clean --testcache && \
 		go test ./... -race
 
-lint: welcome .env ## Code verifier
+lint: welcome .env ## Run linter
 	@docker run \
 		${INTERACTIVE_OR_DETACH} \
 		--tty \
@@ -85,15 +80,15 @@ vendor:
 
 setup: welcome .env vendor ## Install dependencies
 
-clean: ## Cleans vendor and temp files
+clean: ## Clean vendor and temp files
 	@-rm -rf vendor* _vendor* coverage.xml
 
-format: ## Runs automatic and built-in code formatter
+format: ## Run code formatter
 	@command -v goimports >/dev/null 2>&1 || go get -u golang.org/x/tools/cmd/goimports
 	@goimports -l -w -d ${PROJECT_FILES}
 	@gofmt -l -s -w ${PROJECT_FILES}
 
-vet: ## Reports suspicious constructs
+vet: ## Report suspicious constructs
 	@go vet ./...
 
 help: welcome

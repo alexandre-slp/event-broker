@@ -5,11 +5,16 @@ RUN apk add curl build-base
 WORKDIR /event-broker
 
 
-FROM base as development
+FROM base as debug
 
 RUN go install github.com/cortesi/modd/cmd/modd@latest
 RUN go install github.com/go-delve/delve/cmd/dlv@v1.8.2
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.43.0
+
+CMD [ "go", "run", "-race", "./cmd/server/main.go" ]
+
+
+FROM base as dev
 
 CMD [ "go", "run", "-race", "./cmd/server/main.go" ]
 
