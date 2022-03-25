@@ -6,6 +6,8 @@ APP_NAME?=$(shell pwd | xargs basename)
 APP_DIR=$(shell echo /${APP_NAME})
 INTERACTIVE_OR_DETACH:=$(shell [ -t 0 ] && echo --interactive || echo --detach)
 PROJECT_FILES=$(shell find . -type f -name '*.go' -not -path "./vendor/*")
+HAS_DEBUG_IMAGE:=$(shell docker image inspect ${APP_NAME}-debug 2> /dev/null)
+HAS_DEV_IMAGE:=$(shell docker image inspect ${APP_NAME} 2> /dev/null)
 HTTP_PORT:=80
 GRPC_PORT:=6666
 DEBUG_PORT:=2345
@@ -18,9 +20,8 @@ welcome:
 	@printf "\033[33m/_____/ |___/\___/_/ /_/\__/  /_____/_/   \____/_/|_|\___/_/		\n"
 	@printf "\n"
 
-debug: welcome .env vendor ## Run gRPC server in debug mode
+debug: welcome .env vendor build-debug ## Run gRPC server in debug mode
 	@echo 'Running on http://localhost:${GRPC_PORT}'
-
 	@docker run \
 		${INTERACTIVE_OR_DETACH} \
 		--tty \
@@ -32,12 +33,11 @@ debug: welcome .env vendor ## Run gRPC server in debug mode
 		--publish ${DEBUG_PORT}:${DEBUG_PORT} \
 		--env DEBUG_PORT=${DEBUG_PORT} \
 		--name ${APP_NAME}-debug \
-		${APP_NAME} \
+		${APP_NAME}-debug \
 		modd -f ./cmd/server/debug_modd.conf
 
 dev: welcome .env vendor ## Run gRPC server
 	@echo 'Running on http://localhost:${GRPC_PORT}'
-
 	@docker run \
 		${INTERACTIVE_OR_DETACH} \
 		--tty \
@@ -49,9 +49,25 @@ dev: welcome .env vendor ## Run gRPC server
 		${APP_NAME} \
 		modd -f ./cmd/server/dev_modd.conf
 
+build-debug: welcome .env
+	@if [ ${HAS_DEBUG_IMAGE} = "[]" ]; then \
+  		docker build \
+  		--target debug \
+  		--tag ${APP_NAME}-debug \
+  		. ; \
+  	fi
+
+build-dev: welcome .env
+	@if [ ${HAS_DEV_IMAGE} = "[]" ]; then \
+  		docker build \
+  		--target debug \
+  		--tag ${APP_NAME}-dev \
+  		. ; \
+  	fi
+
+
 test: welcome vendor ## Run tests
 	@go clean --testcache
-
 	@docker run \
 		${INTERACTIVE_OR_DETACH} \
 		--tty \
