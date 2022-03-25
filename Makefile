@@ -36,7 +36,7 @@ debug: welcome .env vendor build-debug ## Run gRPC server in debug mode
 		${APP_NAME}-debug \
 		modd -f ./cmd/server/debug_modd.conf
 
-dev: welcome .env vendor ## Run gRPC server
+dev: welcome .env vendor build-dev ## Run gRPC server
 	@echo 'Running on http://localhost:${GRPC_PORT}'
 	@docker run \
 		${INTERACTIVE_OR_DETACH} \
@@ -61,7 +61,7 @@ build-dev: welcome .env
 	@if [ ${HAS_DEV_IMAGE} = "[]" ]; then \
   		docker build \
   		--target debug \
-  		--tag ${APP_NAME}-dev \
+  		--tag ${APP_NAME} \
   		. ; \
   	fi
 
