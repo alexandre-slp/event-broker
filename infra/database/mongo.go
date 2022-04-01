@@ -1,4 +1,4 @@
-package infra
+package database
 
 func NewMongoService(connString string) Repo {
 	return &mongoService{

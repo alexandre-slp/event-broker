@@ -28,7 +28,7 @@ func main() {
 
 	s := grpc.NewServer(
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
-			infra.UnaryZerologInterceptor(),
+			infra.UnaryZerologInterceptor(cfg),
 			grpc_recovery.UnaryServerInterceptor(opt),
 		)),
 	)

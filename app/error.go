@@ -32,7 +32,6 @@ func CustomPanicHandler(ctx context.Context, p interface{}) (err error) {
 
 	logger.Error().Msg(string(debug.Stack()))
 	return status.Errorf(codes.Internal, "unhadled error: %v", p)
-
 }
 
 //NewExampleError Example error

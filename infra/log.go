@@ -3,6 +3,7 @@ package infra
 import (
 	"context"
 	"fmt"
+	"github.com/alexandre-slp/event-broker/app"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
@@ -19,13 +20,8 @@ const (
 	timeFormat = "2006-01-02T15:04:05-0700"
 )
 
-////UnaryZerologOption todo
-//func UnaryZerologOption() grpc.ServerOption {
-//	return grpc.UnaryInterceptor(UnaryZerologInterceptor())
-//}
-
-//UnaryZerologInterceptor todo
-func UnaryZerologInterceptor() grpc.UnaryServerInterceptor {
+//UnaryZerologInterceptor Interceps each request and setup requestId
+func UnaryZerologInterceptor(cfg *app.Config) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
 		// Before processing
 		var requestIdSlice []string
@@ -38,7 +34,7 @@ func UnaryZerologInterceptor() grpc.UnaryServerInterceptor {
 			requestId = requestIdSlice[0]
 		}
 
-		contextAppLogger := setupAppLogger().
+		contextAppLogger := setupAppLogger(cfg).
 			With().
 			Str("requestId", requestId).
 			Logger()
@@ -72,6 +68,8 @@ func UnaryZerologInterceptor() grpc.UnaryServerInterceptor {
 }
 
 func setupRequestLogger() zerolog.Logger {
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+
 	output := zerolog.ConsoleWriter{
 		Out:        os.Stdout,
 		TimeFormat: timeFormat,
@@ -91,7 +89,12 @@ func setupRequestLogger() zerolog.Logger {
 		Logger()
 }
 
-func setupAppLogger() zerolog.Logger {
+func setupAppLogger(cfg *app.Config) zerolog.Logger {
+	zerolog.SetGlobalLevel(logLevelParser(cfg.APP.LogLevel))
+	if cfg.APP.Debug {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+
 	output := zerolog.ConsoleWriter{
 		Out:        os.Stdout,
 		TimeFormat: timeFormat,
@@ -109,4 +112,26 @@ func setupAppLogger() zerolog.Logger {
 		With().
 		Timestamp().
 		Logger()
+}
+
+func logLevelParser(levelName string) zerolog.Level {
+	levelName = strings.ToLower(levelName)
+	switch levelName {
+	case "panic":
+		return zerolog.PanicLevel
+	case "fatal":
+		return zerolog.FatalLevel
+	case "error":
+		return zerolog.ErrorLevel
+	case "warn":
+	case "warning":
+		return zerolog.WarnLevel
+	case "info":
+		return zerolog.InfoLevel
+	case "debug":
+		return zerolog.DebugLevel
+	case "trace":
+		return zerolog.TraceLevel
+	}
+	return zerolog.DebugLevel
 }
