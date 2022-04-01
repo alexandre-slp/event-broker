@@ -65,7 +65,6 @@ build-dev: welcome .env
   		. ; \
   	fi
 
-
 test: welcome vendor ## Run tests
 	@go clean --testcache
 	@docker run \
