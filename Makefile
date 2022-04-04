@@ -6,8 +6,8 @@ APP_NAME?=$(shell pwd | xargs basename)
 APP_DIR=$(shell echo /${APP_NAME})
 INTERACTIVE_OR_DETACH:=$(shell [ -t 0 ] && echo --interactive || echo --detach)
 PROJECT_FILES=$(shell find . -type f -name '*.go' -not -path "./vendor/*")
-HAS_DEBUG_IMAGE:=$(shell docker image inspect ${APP_NAME}-debug 2> /dev/null)
-HAS_DEV_IMAGE:=$(shell docker image inspect ${APP_NAME} 2> /dev/null)
+HAS_DEBUG_IMAGE:=$(shell docker images --quiet ${APP_NAME}-debug)
+HAS_DEV_IMAGE:=$(shell docker images --quiet ${APP_NAME}-dev)
 HTTP_PORT:=80
 GRPC_PORT:=6666
 DEBUG_PORT:=2345
@@ -50,7 +50,7 @@ dev: welcome .env vendor build-dev ## Run gRPC server
 		modd -f ./cmd/server/dev_modd.conf
 
 build-debug: welcome .env
-	@if [ ${HAS_DEBUG_IMAGE} = "[]" ]; then \
+	@if [ -z ${HAS_DEBUG_IMAGE} ]; then \
   		docker build \
   		--target debug \
   		--tag ${APP_NAME}-debug \
@@ -58,10 +58,10 @@ build-debug: welcome .env
   	fi
 
 build-dev: welcome .env
-	@if [ ${HAS_DEV_IMAGE} = "[]" ]; then \
+	@if [ ${HAS_DEV_IMAGE} = "" ]; then \
   		docker build \
-  		--target debug \
-  		--tag ${APP_NAME} \
+  		--target dev \
+  		--tag ${APP_NAME}-dev \
   		. ; \
   	fi
 
@@ -99,7 +99,7 @@ clean: ## Clean vendor and temp files
 	@-rm -rf vendor* _vendor* coverage.xml
 
 format: ## Run code formatter
-	@command -v goimports >/dev/null 2>&1 || go get -u golang.org/x/tools/cmd/goimports
+	@command -v goimports > /dev/null 2>&1 || go get -u golang.org/x/tools/cmd/goimports
 	@goimports -l -w -d ${PROJECT_FILES}
 	@gofmt -l -s -w ${PROJECT_FILES}
 
