@@ -1,6 +1,9 @@
 package main
 
 import (
+	"log"
+	"net"
+
 	"github.com/alexandre-slp/event-broker/app"
 	gRPC2 "github.com/alexandre-slp/event-broker/app/api/v1/gRPC"
 	"github.com/alexandre-slp/event-broker/domain"
@@ -8,8 +11,6 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"google.golang.org/grpc"
-	"log"
-	"net"
 )
 
 func main() {

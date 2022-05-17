@@ -99,7 +99,7 @@ clean: ## Clean vendor and temp files
 	@-rm -rf vendor* _vendor* coverage.xml
 
 format: ## Run code formatter
-	@command -v goimports > /dev/null 2>&1 || go get -u golang.org/x/tools/cmd/goimports
+	@command -v goimports > /dev/null 2>&1 || go install golang.org/x/tools/cmd/goimports@latest
 	@goimports -l -w -d ${PROJECT_FILES}
 	@gofmt -l -s -w ${PROJECT_FILES}
 

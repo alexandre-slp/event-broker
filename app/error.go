@@ -2,10 +2,11 @@ package app
 
 import (
 	"context"
+	"runtime/debug"
+
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"runtime/debug"
 )
 
 type customError struct {

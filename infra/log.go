@@ -3,6 +3,11 @@ package infra
 import (
 	"context"
 	"fmt"
+	"os"
+	"path"
+	"strings"
+	"time"
+
 	"github.com/alexandre-slp/event-broker/app"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
@@ -10,10 +15,6 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
-	"os"
-	"path"
-	"strings"
-	"time"
 )
 
 const (

@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+
 	"github.com/alexandre-slp/event-broker/app/api/v1/gRPC"
 	"github.com/alexandre-slp/event-broker/app/api/v1/serializer"
 )
