@@ -1,4 +1,4 @@
-package domain
+package endpoints
 
 import (
 	"context"
@@ -14,8 +14,5 @@ type HealthCheckServer struct {
 
 // GetHealthCheck implements healthcheck
 func (s *HealthCheckServer) GetHealthCheck(ctx context.Context, in *serializer.HealthCheckRequest) (*serializer.HealthCheckResponse, error) {
-	//panic("xpto")
-	//panic(app.NewExampleError())
-
 	return &serializer.HealthCheckResponse{Status: "ok"}, nil
 }

@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help vet
+.PHONY: help vet proto
 
 PWD=$(shell pwd)
 APP_NAME?=$(shell pwd | xargs basename)
@@ -8,6 +8,11 @@ INTERACTIVE_OR_DETACH:=$(shell [ -t 0 ] && echo --interactive || echo --detach)
 PROJECT_FILES=$(shell find . -type f -name '*.go' -not -path "./vendor/*")
 HAS_DEBUG_IMAGE:=$(shell docker images --quiet ${APP_NAME}-debug)
 HAS_DEV_IMAGE:=$(shell docker images --quiet ${APP_NAME}-dev)
+PROTO_FILES:=$(shell ls infra/api/v1 | grep proto)
+PROTO_PATH:=infra/api/v1
+PROTO_MODULE:=${APP_NAME}/${PROTO_PATH}
+PROTO_SERIALIZER:=${PROTO_PATH}/serializer
+PROTO_GRPC:=${PROTO_PATH}/gRPC
 HTTP_PORT:=80
 GRPC_PORT:=6666
 DEBUG_PORT:=2345
@@ -19,6 +24,14 @@ welcome:
 	@printf "\033[33m / /___ | |/ /  __/ / / / /_   / /_/ / /  / /_/ / ,< /  __/ /		\n"
 	@printf "\033[33m/_____/ |___/\___/_/ /_/\__/  /_____/_/   \____/_/|_|\___/_/		\n"
 	@printf "\n"
+
+proto: ## Generate gRPC and Serializer from Proto files
+	@protoc --proto_path=${PROTO_PATH} \
+		    --go_out=${PROTO_SERIALIZER} \
+		    --go_opt=module=${PROTO_MODULE} \
+		    --go-grpc_out=${PROTO_GRPC} \
+		    --go-grpc_opt=module=${PROTO_MODULE} \
+		    ${PROTO_FILES}
 
 debug: welcome .env vendor build-debug ## Run gRPC server in debug mode
 	@echo 'Running on http://localhost:${GRPC_PORT}'
@@ -90,7 +103,7 @@ lint: welcome .env ## Run linter
 .env:
 	@cp .env.default .env
 
-vendor:
+vendor: ## Run vendor
 	@go mod vendor
 
 setup: welcome .env vendor ## Install dependencies
