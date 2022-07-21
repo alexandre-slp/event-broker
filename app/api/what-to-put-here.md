@@ -1,1 +1,0 @@
-The api is versioned just in case any break change is necessary to follow the domain.

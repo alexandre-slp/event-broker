@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option go_package = "event-broker/infra/api/v1";
+
+package event;
+
+service Event {
+  rpc ListEvents(ListEventRequest) returns (ListEventResponse) {}
+}
+
+message ListEventRequest {}
+
+message ListEventResponse {
+  string events = 1;
+}

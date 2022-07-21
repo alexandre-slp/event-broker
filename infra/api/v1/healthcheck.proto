@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option go_package = "event-broker/infra/api/v1";
+
+package healthcheck;
+
+service Healthcheck {
+  rpc GetHealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {}
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  string status = 1;
+}

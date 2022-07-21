@@ -1,1 +1,0 @@
-All mains containing commands to start the app and execute other stuff
