@@ -1,12 +1,11 @@
 syntax = "proto3";
 
-option go_package = "event-broker/app/api/event";
+option go_package = "event-broker/infra/api/v1";
 
 package event;
 
-// protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative app/api/event/event.proto
 service Event {
-    rpc ListEvents(ListEventRequest) returns (ListEventResponse) {}
+  rpc ListEvents(ListEventRequest) returns (ListEventResponse) {}
 }
 
 message ListEventRequest {}

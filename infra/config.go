@@ -1,4 +1,4 @@
-package app
+package infra
 
 import (
 	"encoding"
@@ -10,19 +10,19 @@ import (
 	"github.com/spf13/viper"
 )
 
-//Config The configuration struc has all the configurations needed by the app
+//Config The configuration struc has all the configurations needed by the appConfig
 type Config struct {
-	APP  app  `mapstructure:",squash"`
-	GRPC grpc `mapstructure:",squash"`
+	APP  appConfig  `mapstructure:",squash"`
+	GRPC grpcConfig `mapstructure:",squash"`
 }
 
-type app struct {
+type appConfig struct {
 	LogLevel string `mapstructure:"log_level"`
 	Name     string `mapstructure:"app_name"`
 	Debug    bool   `mapstructure:"debug"`
 }
 
-type grpc struct {
+type grpcConfig struct {
 	Port string `mapstructure:"grpc_port"`
 }
 

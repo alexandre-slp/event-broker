@@ -4,17 +4,17 @@ import (
 	"log"
 	"net"
 
-	"github.com/alexandre-slp/event-broker/app"
-	gRPC2 "github.com/alexandre-slp/event-broker/app/api/v1/gRPC"
-	"github.com/alexandre-slp/event-broker/domain"
+	"github.com/alexandre-slp/event-broker/infra/api/v1/endpoints"
+	gRPC "github.com/alexandre-slp/event-broker/infra/api/v1/gRPC"
+
 	"github.com/alexandre-slp/event-broker/infra"
-	"github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	grpcMiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpcRecovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	cfg, err := app.NewConfig()
+	cfg, err := infra.NewConfig()
 	if err != nil {
 		log.Fatalf("error while loading cfg. err: %v", err)
 	}
@@ -25,17 +25,17 @@ func main() {
 	}
 
 	// Shared options for the logger, with a custom gRPC code to log level function.
-	opt := grpc_recovery.WithRecoveryHandlerContext(app.CustomPanicHandler)
+	opt := grpcRecovery.WithRecoveryHandlerContext(infra.CustomPanicHandler)
 
 	s := grpc.NewServer(
-		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+		grpc.UnaryInterceptor(grpcMiddleware.ChainUnaryServer(
 			infra.UnaryZerologInterceptor(cfg),
-			grpc_recovery.UnaryServerInterceptor(opt),
+			grpcRecovery.UnaryServerInterceptor(opt),
 		)),
 	)
 
-	gRPC2.RegisterHealthcheckServer(s, &domain.HealthCheckServer{})
-	gRPC2.RegisterEventServer(s, &domain.EventServer{})
+	gRPC.RegisterHealthcheckServer(s, &endpoints.HealthCheckServer{})
+	gRPC.RegisterEventServer(s, &endpoints.EventServer{})
 
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)

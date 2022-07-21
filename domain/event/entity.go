@@ -1,6 +1,6 @@
 //Entities are structs that represents an info and its methods, when necessary its constructors too
 
-package domain
+package event
 
 //SentEvent todo
 type SentEvent struct {

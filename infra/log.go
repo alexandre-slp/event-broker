@@ -8,13 +8,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/alexandre-slp/event-broker/app"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
+
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"
-	"google.golang.org/grpc/status"
 )
 
 const (
@@ -22,7 +22,7 @@ const (
 )
 
 //UnaryZerologInterceptor Interceps each request and setup requestId
-func UnaryZerologInterceptor(cfg *app.Config) grpc.UnaryServerInterceptor {
+func UnaryZerologInterceptor(cfg *Config) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
 		// Before processing
 		var requestIdSlice []string
@@ -90,7 +90,7 @@ func setupRequestLogger() zerolog.Logger {
 		Logger()
 }
 
-func setupAppLogger(cfg *app.Config) zerolog.Logger {
+func setupAppLogger(cfg *Config) zerolog.Logger {
 	zerolog.SetGlobalLevel(logLevelParser(cfg.APP.LogLevel))
 	if cfg.APP.Debug {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)

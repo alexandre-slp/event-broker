@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help vet proto
+.PHONY: help vet vendor proto
 
 PWD=$(shell pwd)
 APP_NAME?=$(shell pwd | xargs basename)
@@ -49,7 +49,7 @@ debug: welcome .env vendor build-debug ## Run gRPC server in debug mode
 		${APP_NAME}-debug \
 		modd -f ./cmd/server/debug_modd.conf
 
-dev: welcome .env vendor build-dev ## Run gRPC server
+dev: welcome .env vendor build-dev ## Run gRPC server in dev mode
 	@echo 'Running on http://localhost:${GRPC_PORT}'
 	@docker run \
 		${INTERACTIVE_OR_DETACH} \
@@ -59,7 +59,7 @@ dev: welcome .env vendor build-dev ## Run gRPC server
 		--expose ${GRPC_PORT} \
 		--publish ${GRPC_PORT}:${HTTP_PORT} \
 		--name ${APP_NAME}-dev \
-		${APP_NAME} \
+		${APP_NAME}-dev \
 		modd -f ./cmd/server/dev_modd.conf
 
 build-debug: welcome .env
@@ -71,7 +71,7 @@ build-debug: welcome .env
   	fi
 
 build-dev: welcome .env
-	@if [ ${HAS_DEV_IMAGE} = "" ]; then \
+	@if [ -z ${HAS_DEV_IMAGE} ]; then \
   		docker build \
   		--target dev \
   		--tag ${APP_NAME}-dev \
