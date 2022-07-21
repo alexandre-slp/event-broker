@@ -16,6 +16,7 @@ CMD ['go', 'run', '-race', './cmd/server/main.go']
 
 FROM base as dev
 
+RUN go install github.com/cortesi/modd/cmd/modd@latest
 CMD ['go', 'run', '-race', './cmd/server/main.go']
 
 
